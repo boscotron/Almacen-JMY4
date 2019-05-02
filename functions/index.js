@@ -1,4 +1,3 @@
-@@ -0,0 +1,80 @@
 /*
 La licencia MIT (MIT)
 
@@ -26,7 +25,8 @@ CONEXIÓN CON EL SOFTWARE O EL USO U OTRAS REPARACIONES EN EL SOFTWARE.
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-admin.initializeApp();
+// admin.initializeApp();
+const firebaseApp = admin.initializeApp(functions.config().firebase);
 const language = require('@google-cloud/language');
 const client = new language.LanguageServiceClient();
 
@@ -43,21 +43,18 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 ///
 const jmy = require('comsis_jmy');
+const jmy_admin = require('comsis_jmy_admin');
 const jmy_connect= require('./config/key.js');
 
+let context = jmy.context;
+app.use('/', jmy_admin);
+app.use(jmy.co);
 app.use(express.static(__dirname + '/public'));
-
 
 app.set('view engine',"hbs");
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(jmy.co);
-let context = jmy.context;
-app.get('/sesion/:i/:t',jmy.entrar(jmy_connect.key),jmy.auth());
-app.get('/instalar', jmy.sesion(jmy_connect.key),jmy.instalar());
-app.get('/administrador/:c', jmy.sesion(jmy_connect.key),jmy.administrador_g());
-app.post('/administrador/:c/:p', jmy.sesion(jmy_connect.key),jmy.administrador_p());
 
 
 app.get('/', jmy.sesion(jmy_connect.key),async (req, res) => {
@@ -73,6 +70,80 @@ app.get('/', jmy.sesion(jmy_connect.key),async (req, res) => {
     res.sendStatus(500);
   }
 });
+
+
+app.get('/almacen/:peticion', jmy.sesion(jmy_connect.key),async (req, res) => {
+  const post = req.body;
+  let acceso = req.accesos
+  try {      
+    console.log('post',post);
+    let data=context(req);
+    /* desde aqui */
+    switch (req.params.peticion) {    
+      case 'proveedor':
+        
+        data.head.title = "Lista de proveedores";
+
+        data.out = {
+          lista_proveerdores:[
+            {
+              id: "321132",
+              nombreProv: "asdasdasd",
+              telProv: "56161561161",
+              direccionProv: "Av. Simpre vivia",
+              diaPedido: "lunes"
+            },
+            {
+              id: "3211345",
+              nombreProv: "asdasdasd",
+              telProv: "56161561161",
+              direccionProv: "Av. Simpre vivia",
+              diaPedido: "martes"
+            }
+          ]
+        };
+        data.carga.js.push({url:data.head.cdn+"assets/js/jmy/jmy_almacen.js"});
+        res.render('alamacen_proveedor',data);    
+      break;
+    
+      default:
+        res.render('index',data);    
+        break;
+    }
+    /* hasta aqui */
+  } catch(error) {
+    console.log('Error detecting sentiment or saving message', error.message);
+    res.sendStatus(500);
+  }
+});
+
+
+
+app.post('/almacen/:peticion', jmy.sesion(jmy_connect.key),async (req, res) => {
+  const post = req.body;
+  console.log("post",post);
+  
+  let acceso = req.accesos
+  try {      
+    console.log('post',post);
+    let data=context(req);
+    /* desde aqui */
+    switch (req.params.peticion) {    
+      case 'proveedor':
+        res.send(JSON.stringify({post:post}));
+      break;
+    
+      default:
+        res.send(JSON.stringify({error:"sin peticion"}));
+      break;
+    }
+    /* hasta aqui */
+  } catch(error) {
+    console.log('Error detecting sentiment or saving message', error.message);
+    res.sendStatus(500);
+  }
+});
+
 
 
 
