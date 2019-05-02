@@ -1,80 +1,193 @@
-/*
-La licencia MIT (MIT)
+var config = {
+    apiKey: "AIzaSyAYxVpEPJeu18b9yU2SsDiUexAgU5_NM7c",
+    authDomain: "prueb-eb7a8.firebaseapp.com",
+    databaseURL: "https://prueb-eb7a8.firebaseio.com",
+    projectId: "prueb-eb7a8",
+    storageBucket: "prueb-eb7a8.appspot.com",
+    messagingSenderId: "487645823863"
+  };
+  firebase.initializeApp(config);
 
-Copyright (c) 2019 Concomsis S.A. de C.V.
+  var d = new Date();
+  var t = d.getTime();
+  var counter =t;
 
-Por la presente se otorga el permiso, sin cargo, a cualquier persona que obtenga una copia de
-este software y los archivos de documentación asociados (el "Software"), para tratar en
-el Software sin restricciones, incluidos, entre otros, los derechos de
-usar, copiar, modificar, fusionar, publicar, distribuir, sublicenciar y / o vender copias de
-el Software, y para permitir que las personas a quienes se suministra el Software lo hagan,
-sujeto a las siguientes condiciones:
+  document.getElementById("form").addEventListener("submit",(e)=>{
+    var producto = document.getElementById("producto").value;
+    var precio = document.getElementById("precio").value;
+    var proveedor = document.getElementById("proveedor").value;
+    var cantidad = document.getElementById("cantidad").value;
+    var fcompra = document.getElementById("fcompra").value;
+    var fventa = document.getElementById("fventa").value;
+    e.preventDefault();
+    createTask(producto,precio,proveedor,cantidad,fcompra,fventa);
+    form.reset();
+  });
 
-El aviso de copyright anterior y este aviso de permiso se incluirán en todas las
-Copias o partes sustanciales del Software.
+  function createTask(producto,precio,proveedor,cantidad,fcompra,fventa){
+      console.log(counter);
+      counter+=1;
+      console.log(counter);
+      var producto={
+          id: counter,
+          producto: producto,
+          precio:precio,
+          proveedor:proveedor,
+          cantidad:cantidad,
+          fcompra:fcompra,
+          fventa:fventa
+      }
+      let db= firebase.database().ref("productos/"+counter);
+      db.set(producto);
+      document.getElementById("cardSection").innerHTML='';
+      readTask();
 
-EL SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍA DE NINGÚN TIPO, EXPRESA O
-IMPLÍCITOS, INCLUIDOS, PERO NO LIMITADOS A LAS GARANTÍAS DE COMERCIABILIDAD, APTITUD
-PARA UN PROPÓSITO PARTICULAR Y NO INCUMPLIMIENTO. EN NINGÚN CASO LOS AUTORES O
-LOS TITULARES DEL DERECHO DE AUTOR SERÁN RESPONSABLES POR CUALQUIER RECLAMACIÓN, DAÑOS U OTRAS RESPONSABILIDADES, SI
-EN UNA ACCIÓN DE CONTRATO, CORTE O DE OTRA MANERA, DERIVADO DE, FUERA O EN
-CONEXIÓN CON EL SOFTWARE O EL USO U OTRAS REPARACIONES EN EL SOFTWARE.
-*/
-'use strict';
-/////////////////////// CON FIREBASE
-
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-admin.initializeApp();
-const language = require('@google-cloud/language');
-const client = new language.LanguageServiceClient();
-
-/////////////////////////////
-const express = require('express');
-const engines = require('consolidate');
-const hbs = require('hbs');
-const app = express();
-///////
-const path = require('path');
-const favicon = require('serve-favicon');
-const logger = require('morgan');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-///
-const jmy = require('comsis_jmy');
-const jmy_connect= require('./config/key.js');
-
-app.use(express.static(__dirname + '/public'));
-
-
-app.set('view engine',"hbs");
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(jmy.co);
-let context = jmy.context;
-app.get('/sesion/:i/:t',jmy.entrar(jmy_connect.key),jmy.auth());
-app.get('/instalar', jmy.sesion(jmy_connect.key),jmy.instalar());
-app.get('/administrador/:c', jmy.sesion(jmy_connect.key),jmy.administrador_g());
-app.post('/administrador/:c/:p', jmy.sesion(jmy_connect.key),jmy.administrador_p());
-
-
-app.get('/', jmy.sesion(jmy_connect.key),async (req, res) => {
-
-  const post = req.body;
-  let acceso = req.accesos
-  try {      
-    console.log('post',post);
-    let data=context(req);
-    res.render('index',data);    
-  } catch(error) {
-    console.log('Error detecting sentiment or saving message', error.message);
-    res.sendStatus(500);
   }
-});
+
+  function readTask(){
+      var producto= firebase.database().ref("productos/");
+      producto.on("child_added",function(data){
+        var productoValue= data.val();
+        
+        document.getElementById("cardSection").innerHTML+=`
+        <div class="card mb-3">
+        <div class="card-body">
+        <h5 class="card-title">${productoValue.producto}</h5>
+        <p class="card-text">${productoValue.precio}</p>
+        <p class="card-text">${productoValue.proveedor}</p>
+        <p class="card-text">${productoValue.cantidad}</p>
+        <p class="card-text">${productoValue.fcompra}</p>
+        <p class="card-text">${productoValue.fventa}</p>
+        <button type="submit" style="color:white" class="btn btn-warning" onclick="updateTask(${productoValue.id},'${productoValue.producto}','${productoValue.precio}','${productoValue.proveedor}','${productoValue.cantidad}','${productoValue.fcompra}','${productoValue.fventa}')"> 
+        <i class="fas fa-edit"></i>Edit task</button>
+        <button type="submit" class="btn btn-danger" onclick="deleteTask(${productoValue.id})">
+        <i class="fas fa-trash-alt"></i>Delete task</button>
+         </div> 
+        </div>
+        `
+      })
+  }
+
+  function reset(){
+      document.getElementById("firstSection").innerHTML=`
+      <form class="border p-4 mb-4" id="form">
+      <div class="form-group">
+      <label>Producto</label>
+      <input type="text" class="form-control" id="producto" placeholder="Producto">
+  </div>
+  <div class="form-group">
+      <label>Precio</label>
+      <input type="text" class="form-control" id="precio" placeholder="Precio"></div>
+      <div class="form-group">
+      <label>Proveedor</label>
+      <input type="text" class="form-control" id="proveedor" placeholder="proveedor"></div>
+      <div class="form-group">
+      <label>Cantidad</label>
+      <input type="text" class="form-control" id="cantidad" placeholder="Cantidad"></div>
+      <div class="form-group">
+      <label>Fecha de Compra</label>
+      <input type="text" class="form-control" id="fcompra" placeholder="Fecha de Compra"></div>
+      <div class="form-group">
+      <label>Fecha de Venta</label>
+      <input type="text" class="form-control" id="fventa" placeholder="Fecha de Venta"></div>
 
 
+      <button type="submit" id="button1" class="btn btn-primary"><i class="fas fa-plus"></i>Add task</button>
+      <button style="display: none" id="button2" class="btn btn-success">Update task</button>
+      <button style="display: none" id="button3" class="btn btn-danger">Cancel</button>
 
-// Expose the API as a function
-exports.api = functions.https.onRequest(app);
+      </form>
+      `;
 
+      document.getElementById("form").addEventListener("submit",(e)=>{
+        var producto = document.getElementById("producto").value;
+    var precio = document.getElementById("precio").value;
+    var proveedor = document.getElementById("proveedor").value;
+    var cantidad = document.getElementById("cantidad").value;
+    var fcompra = document.getElementById("fcompra").value;
+    var fventa = document.getElementById("fventa").value;
+        e.preventDefault();
+        createTask(producto,precio,proveedor,cantidad,fcompra,fventa);
+        form.reset();
+      });
+  }
+
+  function updateTask(id,producto,precio,proveedor,cantidad,fcompra,fventa){
+      document.getElementById("firstSection").innerHTML=`
+      <form class="border p-4 mb-4" id="form2">
+      <div class="form-group">
+      <label>Producto</label>
+      <input type="text" class="form-control" id="producto" placeholder="Producto"></div>
+      <div class="form-group">
+      <label>Precio</label>
+      <input type="text" class="form-control" id="precio" placeholder="Precio"></div>
+      <div class="form-group">
+      <label>Proveedor</label>
+      <input type="text" class="form-control" id="proveedor" placeholder="proveedor"></div>
+      <div class="form-group">
+      <label>Cantidad</label>
+      <input type="text" class="form-control" id="cantidad" placeholder="Cantidad"></div>
+      <div class="form-group">
+      <label>Fecha de Compra</label>
+      <input type="text" class="form-control" id="fcompra" placeholder="Fecha de Compra"></div>
+      <div class="form-group">
+      <label>Fecha de Venta</label>
+      <input type="text" class="form-control" id="fventa" placeholder="Fecha de Venta"></div>
+
+      <button style="display: none" id="button1" class="btn btn-primary">Add task</button>
+      <button type="submit" style="display: inline-block" id="button2" class="btn btn-success"><i class="fas fa-sync-alt"></i>Update task</button>
+      <button style="display: inline-block" id="button3" class="btn btn-danger"><i class="fas fa-ban"></i>Cancel</button>
+
+      </form>
+      `;
+      document.getElementById("form2").addEventListener("submit",(e)=>{
+        e.preventDefault();
+      });
+      document.getElementById("button3").addEventListener("click",(e)=>{
+        reset();
+      });
+      document.getElementById("button2").addEventListener("click",(e)=>{
+        updateTask2(id,document.getElementById("producto").value,document.getElementById
+        ("precio").value,document.getElementById("proveedor").value,document.getElementById
+        ("cantidad").value,document.getElementById("fcompra").value,document.getElementById
+        ("fventa").value);
+    });
+      
+      document.getElementById("producto").value=producto;
+      document.getElementById("precio").value=precio;
+      document.getElementById("proveedor").value=proveedor;
+      document.getElementById("cantidad").value=cantidad;
+      document.getElementById("fcompra").value=fcompra;
+      document.getElementById("fventa").value=fventa;
+
+  }
+
+  function updateTask2(id,producto,precio,proveedor,cantidad,fcompra,fventa){
+    var taskUpdated={
+        id: counter,
+          producto: producto,
+          precio:precio,
+          proveedor:proveedor,
+          cantidad:cantidad,
+          fcompra:fcompra,
+          fventa:fventa
+
+    }
+    let db= firebase.database().ref("productos/"+id);
+    db.set(taskUpdated);
+
+    document.getElementById("cardSection").innerHTML='';
+    readTask();
+    reset();
+  }
+
+  function deleteTask(id){
+      var producto= firebase.database().ref("productos/"+id);
+      producto.remove();
+      reset();
+      document.getElementById("cardSection").innerHTML='';
+      readTask();
+  }
+
+
+  
