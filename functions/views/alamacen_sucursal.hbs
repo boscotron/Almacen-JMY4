@@ -5,28 +5,23 @@
             <form method="#" action="#">
                 <div class="card-header">
                     <h4 class="card-title">
-                        Nuevo / Editar proveedor
+                        Nuevo / Editar sucursal
                     </h4>
                 </div>
                 <div class="card-content">
-                    <div class="form-group">
-                        <label>Nombre del proveedor</label>
-                        <input type="text" placeholder="Nombre del proveedor" class="form-control formulario   " id="nombreProv">
-                    </div>
-                    <div class="form-group">
-                        <label>Telefono</label>
-                        <input type="text" class="form-control formulario" id="telProv" placeholder="Telefono">
-                    </div>
-                    <div class="form-group">
+                     <div class="form-group">
                         <label>Dirección </label>
                         <input type="text" placeholder="Calle, número, colonia...." class="form-control formulario " id="direccion">
                     </div>
                      <div class="form-group">
-                        <label>Dia de Pedido</label>
-                        <input type="text" class="form-control formulario " id="diaPedido" placeholder="Lunes, Martes, Miercoles, Jueves, Viernes, Sabado.">
+                        <label>Telefono</label>
+                        <input type="text" class="form-control formulario" id="telefono" placeholder="Telefono">
                     </div>
-
-                    <button type="button" id="guardar_proveedor" class="btn btn-fill btn-info">Guardar</button>
+                     <div class="form-group">
+                        <label>Responsable</label>
+                        <input type="text" class="form-control formulario " id="responsable" placeholder="Responsable">
+                    </div>
+                    <button type="button" id="guardar_sucursal" class="btn btn-fill btn-info">Guardar</button>
                 </div>
             </form>
         </div> <!-- end card -->
@@ -34,7 +29,7 @@
     <div class="col-sm-12 col-md-6 col-lg-8">
         <div class="card">
             <div class="card-header">
-                <h4 class="card-title">Lista de proveedores</h4>
+                <h4 class="card-title">Lista de sucursales</h4>
                 <p class="category">Here is a subtitle for this table</p>
             </div>
             <div class="card-content table-responsive table-full-width">
@@ -42,21 +37,19 @@
                     <thead>
                         <tr>
                             <th class="text-center">#</th>
-                            <th>Nombre</th>
-                            <th>Telefono</th>
                             <th>Dirección</th>
-                            <th>Dia de Pedido</th>
+                            <th>Telefono</th>
+                            <th>Responsable</th>
                             <th class="text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                    {{#carga out.lista_proveerdores}}
+                    {{#carga out.lista_sucursales}}
                         <tr>
                             <td>{{id}}</td>
-                            <td>{{nombreProv}}</td>
-                            <td>{{telProv}}</td>
                             <td>{{direccion}}</td>
-                            <td>{{diaPedido}}</td>
+                            <td>{{telefono}}</td>
+                            <td>{{responsable}}</td>
                             <td class="td-actions text-right">                                
                                 <a href="#" rel="tooltip" title="Edit Profile" class="btn btn-success btn-simple btn-xs">
                                     <i class="ti-pencil-alt"></i>
